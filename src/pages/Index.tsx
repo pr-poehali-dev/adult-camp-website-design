@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -96,6 +97,33 @@ const Index = () => {
     'https://cdn.poehali.dev/projects/22449f29-54dc-4b6f-8b40-24f2c1340c24/files/436d2625-abfd-4a89-9541-8872130b2046.jpg'
   ];
 
+  const faqItems = [
+    {
+      question: 'Какой уровень физической подготовки нужен?',
+      answer: 'Наши маршруты подходят для людей с базовым уровнем физической подготовки. Мы предлагаем программы разной сложности — от легких прогулок до сложных горных восхождений. Главное — желание и позитивный настрой!'
+    },
+    {
+      question: 'Что нужно взять с собой?',
+      answer: 'Мы предоставляем все необходимое снаряжение: палатки, спальники, коврики, посуду. Вам нужно взять личные вещи: удобную одежду и обувь для походов, средства гигиены, фонарик, личную аптечку. Полный список вышлем после бронирования.'
+    },
+    {
+      question: 'Как организовано питание?',
+      answer: 'Трехразовое питание включено в стоимость. Готовим на костре из свежих продуктов. Меню разнообразное и сбалансированное. Учитываем пожелания по вегетарианскому питанию и аллергии — просто сообщите заранее.'
+    },
+    {
+      question: 'Можно ли приехать одному?',
+      answer: 'Конечно! Многие участники приезжают в одиночку и находят новых друзей. Мы формируем дружные группы до 15 человек, где каждый чувствует себя комфортно. Одиночные туристы быстро становятся частью команды.'
+    },
+    {
+      question: 'Что делать в случае непогоды?',
+      answer: 'У нас есть запасные планы на любую погоду. При сильном дожде или грозе мы корректируем маршрут, останавливаемся в безопасных местах. Наши гиды — опытные профессионалы с многолетним стажем и всегда заботятся о безопасности группы.'
+    },
+    {
+      question: 'Есть ли медицинская помощь?',
+      answer: 'Да, все наши инструкторы имеют сертификаты по оказанию первой помощи. С группой всегда есть аптечка. На длительных маршрутах (7+ дней) с нами едет медицинский работник. У нас есть спутниковая связь для экстренных случаев.'
+    }
+  ];
+
   return (
     <div className="min-h-screen">
       <nav className="fixed top-0 w-full bg-white/90 backdrop-blur-sm shadow-sm z-50">
@@ -106,12 +134,12 @@ const Index = () => {
               Лагерь Вершина
             </h1>
             <div className="hidden md:flex gap-6">
-              {['Главная', 'Активности', 'Цены', 'Отзывы', 'Галерея', 'Контакты'].map((item) => (
+              {['Главная', 'Активности', 'Цены', 'Отзывы', 'Галерея', 'FAQ', 'Контакты'].map((item) => (
                 <button
                   key={item}
-                  onClick={() => scrollToSection(item.toLowerCase())}
+                  onClick={() => scrollToSection(item === 'FAQ' ? 'faq' : item.toLowerCase())}
                   className={`font-medium transition-colors hover:text-primary ${
-                    activeSection === item.toLowerCase() ? 'text-primary' : 'text-foreground'
+                    activeSection === (item === 'FAQ' ? 'faq' : item.toLowerCase()) ? 'text-primary' : 'text-foreground'
                   }`}
                 >
                   {item}
@@ -398,7 +426,32 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="контакты" className="py-20 bg-background">
+      <section id="faq" className="py-20 bg-background">
+        <div className="container mx-auto px-4">
+          <h2 className="font-heading text-4xl md:text-5xl font-bold text-center mb-4 text-primary">
+            Частые вопросы
+          </h2>
+          <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+            Ответы на самые популярные вопросы о наших походах
+          </p>
+          <div className="max-w-3xl mx-auto">
+            <Accordion type="single" collapsible className="space-y-4">
+              {faqItems.map((item, index) => (
+                <AccordionItem key={index} value={`item-${index}`} className="border rounded-xl px-6 bg-card">
+                  <AccordionTrigger className="font-heading text-lg text-left hover:no-underline py-4">
+                    {item.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground pb-4">
+                    {item.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </div>
+      </section>
+
+      <section id="контакты" className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <h2 className="font-heading text-4xl md:text-5xl font-bold text-center mb-4 text-primary">
             Контакты
