@@ -1,10 +1,26 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format } from 'date-fns';
+import { ru } from 'date-fns/locale';
+import { toast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('home');
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date>();
+  const [selectedProgram, setSelectedProgram] = useState('');
+  const [participants, setParticipants] = useState('1');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
 
   const scrollToSection = (id: string) => {
     setActiveSection(id);
@@ -182,9 +198,143 @@ const Index = () => {
                       </li>
                     ))}
                   </ul>
-                  <Button className="w-full mt-6" variant={index === 1 ? 'default' : 'outline'}>
-                    Забронировать
-                  </Button>
+                  <Dialog open={bookingOpen} onOpenChange={setBookingOpen}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        className="w-full mt-6" 
+                        variant={index === 1 ? 'default' : 'outline'}
+                        onClick={() => setSelectedProgram(plan.name)}
+                      >
+                        Забронировать
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[500px]">
+                      <DialogHeader>
+                        <DialogTitle className="font-heading text-2xl">Бронирование программы</DialogTitle>
+                        <DialogDescription>
+                          Заполните форму, и мы свяжемся с вами для подтверждения бронирования
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="program">Программа</Label>
+                          <Select value={selectedProgram} onValueChange={setSelectedProgram}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Выберите программу" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {prices.map((p) => (
+                                <SelectItem key={p.name} value={p.name}>
+                                  {p.name} — {p.price}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label>Дата начала</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className="w-full justify-start text-left font-normal"
+                              >
+                                <Icon name="Calendar" className="mr-2" size={16} />
+                                {selectedDate ? format(selectedDate, 'PPP', { locale: ru }) : 'Выберите дату'}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={selectedDate}
+                                onSelect={setSelectedDate}
+                                disabled={(date) => date < new Date()}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="participants">Количество участников</Label>
+                          <Select value={participants} onValueChange={setParticipants}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                                <SelectItem key={num} value={num.toString()}>
+                                  {num} {num === 1 ? 'человек' : num < 5 ? 'человека' : 'человек'}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="name">Ваше имя</Label>
+                          <Input
+                            id="name"
+                            placeholder="Иван Иванов"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="phone">Телефон</Label>
+                          <Input
+                            id="phone"
+                            type="tel"
+                            placeholder="+7 (999) 123-45-67"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="email">Email</Label>
+                          <Input
+                            id="email"
+                            type="email"
+                            placeholder="example@mail.ru"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                          />
+                        </div>
+
+                        <Button 
+                          className="w-full" 
+                          size="lg"
+                          onClick={() => {
+                            if (!selectedProgram || !selectedDate || !name || !phone) {
+                              toast({
+                                title: 'Заполните все поля',
+                                description: 'Пожалуйста, укажите программу, дату, имя и телефон',
+                                variant: 'destructive'
+                              });
+                              return;
+                            }
+                            toast({
+                              title: 'Заявка отправлена!',
+                              description: 'Мы свяжемся с вами в ближайшее время для подтверждения'
+                            });
+                            setBookingOpen(false);
+                            setSelectedProgram('');
+                            setSelectedDate(undefined);
+                            setParticipants('1');
+                            setName('');
+                            setEmail('');
+                            setPhone('');
+                          }}
+                        >
+                          <Icon name="Send" size={20} className="mr-2" />
+                          Отправить заявку
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </CardContent>
               </Card>
             ))}
